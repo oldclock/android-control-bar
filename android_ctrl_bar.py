@@ -30,7 +30,7 @@ layout = [ [sg.Text("Press button")],
          ]
 
 # Create the window
-window = sg.Window('Android Control Bar', layout)
+window = sg.Window('Android Control Bar', layout, keep_on_top = True)
 
 # Display and interact with the Window using an Event Loop
 while True:
