@@ -28,6 +28,7 @@ layout = [ [sg.Text("Device:")],
            [sg.Button(size=(7,1), key='btnWAKEUP', button_text='Resume'),
             sg.Button(size=(7,1), key='btnSLEEP', button_text='Suspend'),
             sg.Button(size=(7,1), key='btnREBOOT', button_text='Reboot')],
+           [sg.HorizontalSeparator()],
            [sg.Text("Key codes:")],
            [sg.Button(size=(5,1), key='btnBACK', button_text='◀'),
             sg.Button(size=(5,1), key='btnHOME', button_text='●'),
@@ -40,13 +41,15 @@ layout = [ [sg.Text("Device:")],
             sg.Button(size=(5,1), key='btnDPAD_DOWN', button_text='↓'),
             sg.Button(size=(5,1), key='btnDPAD_RIGHT', button_text='→'),
             sg.Button(size=(5,1), key='btnVOLUME_DOWN', button_text='♪-')],
+           [sg.HorizontalSeparator()],
            [sg.Text("ADB commands:")],
            [sg.Button(size=(7,1), key='btnADB_ROOT', button_text='root'),
             sg.Button(size=(7,1), key='btnADB_UNROOT', button_text='unroot'),
             sg.Button(size=(7,1), key='btnADB_REMOUNT', button_text='remount')],
+           [sg.HorizontalSeparator()],
            [sg.Button(size=(12,1), key='btnDEVICES', button_text='Check device')],
-           [sg.Checkbox(key='chkboxDevice', text='')],
-           [sg.Text("Status: "), sg.Text(size=(25,1), key='statusText')],
+           [sg.Checkbox(key='chkboxDevice', text='None', disabled=True)],
+           [sg.Text("Status: "), sg.Text(size=(25,1), key='statusText')]
          ]
 
 # Create the window
@@ -111,7 +114,7 @@ while True:
         adbCmd(5, "reboot")
         window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnDEVICES':
-        window['chkboxDevice'].update(text='')
+        window['chkboxDevice'].update(text='None', disabled=True)
         cmd = "adb devices"
         stdoutdata = subprocess.getoutput(cmd)
         print(stdoutdata)
@@ -125,7 +128,7 @@ while True:
             else:
                 strSerial, strDevStatus = line.split(maxsplit=1)
                 if strDevStatus == 'device':
-                    window['chkboxDevice'].update(text=strSerial)
+                    window['chkboxDevice'].update(text=strSerial, disabled=False)
 
 # Finish up by removing from the screen
 window.close()
