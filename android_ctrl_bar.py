@@ -24,10 +24,14 @@ def adbCmd(timeout_sec: int, command: str) -> bool:
     return rc
 
 # Define the window's contents
-layout = [ [sg.Text("Press button")],
+layout = [ [sg.Text("Device:")],
+           [sg.Button(size=(7,1), key='btnWAKEUP', button_text='Resume'),
+            sg.Button(size=(7,1), key='btnSLEEP', button_text='Suspend'),
+            sg.Button(size=(7,1), key='btnREBOOT', button_text='Reboot')],
+           [sg.Text("Key codes:")],
            [sg.Button(size=(5,1), key='btnBACK', button_text='◀'),
-            sg.Button(size=(5,1), key='btnHOME', button_text='⏺'),
-            sg.Button(size=(5,1), key='btnAPP_SWITCH', button_text='⏹')],
+            sg.Button(size=(5,1), key='btnHOME', button_text='●'),
+            sg.Button(size=(5,1), key='btnAPP_SWITCH', button_text='◼')],
            [sg.Button(size=(5,1), key='btnPAGE_UP', button_text='PgUp'),
             sg.Button(size=(5,1), key='btnDPAD_UP', button_text='↑'),
             sg.Button(size=(5,1), key='btnPAGE_DOWN', button_text='PgDn'),
@@ -36,7 +40,11 @@ layout = [ [sg.Text("Press button")],
             sg.Button(size=(5,1), key='btnDPAD_DOWN', button_text='↓'),
             sg.Button(size=(5,1), key='btnDPAD_RIGHT', button_text='→'),
             sg.Button(size=(5,1), key='btnVOLUME_DOWN', button_text='♪-')],
-           [sg.Text("Status: "), sg.Text(size=(30,1), key='statusText')],
+           [sg.Text("ADB commands:")],
+           [sg.Button(size=(7,1), key='btnADB_ROOT', button_text='root'),
+            sg.Button(size=(7,1), key='btnADB_UNROOT', button_text='unroot'),
+            sg.Button(size=(7,1), key='btnADB_REMOUNT', button_text='remount')],
+           [sg.Text("Status: "), sg.Text(size=(25,1), key='statusText')],
          ]
 
 # Create the window
@@ -81,6 +89,24 @@ while True:
         window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnVOLUME_DOWN':
         adbCmd(5, "shell input keyevent VOLUME_DOWN")
+        window['statusText'].update('Input ' + event + ", done")
+    elif event == 'btnADB_ROOT':
+        adbCmd(5, "root")
+        window['statusText'].update('Input ' + event + ", done")
+    elif event == 'btnADB_UNROOT':
+        adbCmd(5, "unroot")
+        window['statusText'].update('Input ' + event + ", done")
+    elif event == 'btnADB_REMOUNT':
+        adbCmd(5, "remount")
+        window['statusText'].update('Input ' + event + ", done")
+    elif event == 'btnWAKEUP':
+        adbCmd(5, "shell input keyevent WAKEUP")
+        window['statusText'].update('Input ' + event + ", done")
+    elif event == 'btnSLEEP':
+        adbCmd(5, "shell input keyevent SLEEP")
+        window['statusText'].update('Input ' + event + ", done")
+    elif event == 'btnREBOOT':
+        adbCmd(5, "reboot")
         window['statusText'].update('Input ' + event + ", done")
 
 # Finish up by removing from the screen
