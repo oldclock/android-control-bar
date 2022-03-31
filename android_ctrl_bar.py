@@ -44,6 +44,8 @@ layout = [ [sg.Text("Device:")],
            [sg.Button(size=(7,1), key='btnADB_ROOT', button_text='root'),
             sg.Button(size=(7,1), key='btnADB_UNROOT', button_text='unroot'),
             sg.Button(size=(7,1), key='btnADB_REMOUNT', button_text='remount')],
+           [sg.Button(size=(12,1), key='btnDEVICES', button_text='Check device')],
+           [sg.Checkbox(key='chkboxDevice', text='')],
            [sg.Text("Status: "), sg.Text(size=(25,1), key='statusText')],
          ]
 
@@ -108,6 +110,22 @@ while True:
     elif event == 'btnREBOOT':
         adbCmd(5, "reboot")
         window['statusText'].update('Input ' + event + ", done")
+    elif event == 'btnDEVICES':
+        window['chkboxDevice'].update(text='')
+        cmd = "adb devices"
+        stdoutdata = subprocess.getoutput(cmd)
+        print(stdoutdata)
+        for line in stdoutdata.splitlines():
+            if line[0] == '*':
+                # ignore
+                print(line)
+            elif line == 'List of devices attached':
+                # ignore
+                print(line)
+            else:
+                strSerial, strDevStatus = line.split(maxsplit=1)
+                if strDevStatus == 'device':
+                    window['chkboxDevice'].update(text=strSerial)
 
 # Finish up by removing from the screen
 window.close()
