@@ -23,11 +23,36 @@ def adbCmd(timeout_sec: int, command: str) -> bool:
         rc = False
     return rc
 
+def fastbootCmd(timeout_sec: int, command: str) -> bool:
+    rc = True
+    if timeout_sec < 1:
+        print("Arg timeout_sec must >= 1")
+        return False
+    try:
+        cmd = "fastboot " + command
+        stdoutdata = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=timeout_sec)
+    except subprocess.TimeoutExpired:
+        print("fastboot command TIMEOUT !!!")
+        rc = False
+    except subprocess.CalledProcessError as e:
+        print(e.output)
+        rc = False
+    return rc
+
 # Define the window's contents
-layout = [ [sg.Text("Device:")],
-           [sg.Button(size=(7,1), key='btnWAKEUP', button_text='Resume'),
-            sg.Button(size=(7,1), key='btnSLEEP', button_text='Suspend'),
-            sg.Button(size=(7,1), key='btnREBOOT', button_text='Reboot')],
+layout = [ [sg.Text("ADB commands:")],
+           [sg.Button(key='btnWAKEUP', button_text='Resume'),
+            sg.Button(key='btnSLEEP', button_text='Suspend'),
+            sg.Button(key='btnREBOOT', button_text='Reboot')],
+           [sg.Button(key='btnREBOOT_BL', button_text='Reboot Bootloader'),
+            sg.Button(key='btnDISABLE_VERITY', button_text='Disable-verity')],
+           [sg.Button(key='btnADB_ROOT', button_text='Root'),
+            sg.Button(key='btnADB_UNROOT', button_text='Unroot'),
+            sg.Button(key='btnADB_REMOUNT', button_text='Remount')],
+           [sg.HorizontalSeparator()],
+           [sg.Text("Fastboot commands:")],
+           [sg.Button(key='btnFB_REBOOT', button_text='Reboot'),
+            sg.Button(key='btnFB_REBOOT_BL', button_text='Reboot Bootloader')],
            [sg.HorizontalSeparator()],
            [sg.Text("Key codes:")],
            [sg.Button(size=(5,1), key='btnBACK', button_text='◀'),
@@ -42,14 +67,15 @@ layout = [ [sg.Text("Device:")],
             sg.Button(size=(5,1), key='btnDPAD_RIGHT', button_text='→'),
             sg.Button(size=(5,1), key='btnVOLUME_DOWN', button_text='♪-')],
            [sg.HorizontalSeparator()],
-           [sg.Text("ADB commands:")],
-           [sg.Button(size=(7,1), key='btnADB_ROOT', button_text='root'),
-            sg.Button(size=(7,1), key='btnADB_UNROOT', button_text='unroot'),
-            sg.Button(size=(7,1), key='btnADB_REMOUNT', button_text='remount')],
-           [sg.HorizontalSeparator()],
-           [sg.Button(size=(12,1), key='btnDEVICES', button_text='Check device')],
+           [sg.Button(key='btnADB_DEVICES', button_text='Check ADB'),
+            sg.Button(key='btnFB_DEVICES', button_text='Check Fastboot')],
            [sg.Checkbox(key='chkboxDevice', text='None', disabled=True)],
-           [sg.Text("Status: "), sg.Text(size=(25,1), key='statusText')]
+           [sg.HorizontalSeparator()],
+           [sg.Text("Source:", size=(6,1)), sg.Input(key='inputPushFileSource'), sg.FileBrowse()],
+           [sg.Text("Target:", size=(6,1)), sg.Input(key='inputPushTarget', default_text='/sdcard/')],
+           [sg.Button(size=(10,1), key='btnPushFile', button_text='Push File')],
+           [sg.HorizontalSeparator()],
+           [sg.Text("Status:"), sg.Text(key='statusText')]
          ]
 
 # Create the window
@@ -61,7 +87,7 @@ while True:
     # See if user wants to quit or window was closed
     if event == sg.WINDOW_CLOSED:
         break
-    # Handle button events
+    # Key codes
     elif event == 'btnBACK':
         adbCmd(5, "shell input keyevent BACK")
         window['statusText'].update('Input ' + event + ", done")
@@ -95,6 +121,7 @@ while True:
     elif event == 'btnVOLUME_DOWN':
         adbCmd(5, "shell input keyevent VOLUME_DOWN")
         window['statusText'].update('Input ' + event + ", done")
+    # ADB commands
     elif event == 'btnADB_ROOT':
         adbCmd(5, "root")
         window['statusText'].update('Input ' + event + ", done")
@@ -111,9 +138,23 @@ while True:
         adbCmd(5, "shell input keyevent SLEEP")
         window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnREBOOT':
-        adbCmd(5, "reboot")
+        adbCmd(10, "reboot")
         window['statusText'].update('Input ' + event + ", done")
-    elif event == 'btnDEVICES':
+    elif event == 'btnREBOOT_BL':
+        adbCmd(10, "reboot bootloader")
+        window['statusText'].update('Input ' + event + ", done")
+    elif event == 'btnDISABLE_VERITY':
+        adbCmd(5, "disable-verity")
+        window['statusText'].update('Input ' + event + ", done")
+    # Fastboot commands
+    elif event == 'btnFB_REBOOT':
+        fastbootCmd(10, "reboot")
+        window['statusText'].update('Input ' + event + ", done")
+    elif event == 'btnFB_REBOOT_BL':
+        fastbootCmd(10, "reboot bootloader")
+        window['statusText'].update('Input ' + event + ", done")
+    # Check devices
+    elif event == 'btnADB_DEVICES':
         window['chkboxDevice'].update(text='None', disabled=True)
         cmd = "adb devices"
         stdoutdata = subprocess.getoutput(cmd)
@@ -129,6 +170,25 @@ while True:
                 strSerial, strDevStatus = line.split(maxsplit=1)
                 if strDevStatus == 'device':
                     window['chkboxDevice'].update(text=strSerial, disabled=False)
+    elif event == 'btnFB_DEVICES':
+        window['chkboxDevice'].update(text='None', disabled=True)
+        cmd = "fastboot devices"
+        stdoutdata = subprocess.getoutput(cmd)
+        print(stdoutdata)
+        for line in stdoutdata.splitlines():
+            if line[0] == '*':
+                # ignore
+                print(line)
+            elif line == 'List of devices attached':
+                # ignore
+                print(line)
+            else:
+                strSerial, strDevStatus = line.split(maxsplit=1)
+                if strDevStatus == 'fastboot':
+                    window['chkboxDevice'].update(text=strSerial, disabled=False)
+    # Push file to device
+    elif event == 'btnPushFile':
+        adbCmd(10, "push \"" + window['inputPushFileSource'].get() + "\" \"" + window['inputPushTarget'].get() + "\"")
 
 # Finish up by removing from the screen
 window.close()
