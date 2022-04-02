@@ -16,11 +16,15 @@ def adbCmd(timeout_sec: int, command: str) -> bool:
         cmd = "adb " + command
         stdoutdata = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=timeout_sec)
     except subprocess.TimeoutExpired:
-        print("adb command TIMEOUT !!!")
+        #print("adb command TIMEOUT !!!")
+        window['statusText'].update('Command timeout: ' + cmd)
         rc = False
     except subprocess.CalledProcessError as e:
         print(e.output)
+        window['statusText'].update('Command error: ' + e.output)
         rc = False
+    if rc == True:
+        window['statusText'].update('Command done: ' + cmd)
     return rc
 
 def fastbootCmd(timeout_sec: int, command: str) -> bool:
@@ -32,11 +36,15 @@ def fastbootCmd(timeout_sec: int, command: str) -> bool:
         cmd = "fastboot " + command
         stdoutdata = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=timeout_sec)
     except subprocess.TimeoutExpired:
-        print("fastboot command TIMEOUT !!!")
+        #print("fastboot command TIMEOUT !!!")
+        window['statusText'].update('Command timeout: ' + cmd)
         rc = False
     except subprocess.CalledProcessError as e:
         print(e.output)
+        window['statusText'].update('Command error: ' + e.output)
         rc = False
+    if rc == True:
+        window['statusText'].update('Command cone: ' + cmd)
     return rc
 
 # Define the window's contents
@@ -90,69 +98,48 @@ while True:
     # Key codes
     elif event == 'btnBACK':
         adbCmd(5, "shell input keyevent BACK")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnHOME':
         adbCmd(5, "shell input keyevent HOME")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnAPP_SWITCH':
         adbCmd(5, "shell input keyevent APP_SWITCH")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnPAGE_UP':
         adbCmd(5, "shell input keyevent PAGE_UP")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnPAGE_DOWN':
         adbCmd(5, "shell input keyevent PAGE_DOWN")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnDPAD_UP':
         adbCmd(5, "shell input keyevent DPAD_UP")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnDPAD_DOWN':
         adbCmd(5, "shell input keyevent DPAD_DOWN")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnDPAD_LEFT':
         adbCmd(5, "shell input keyevent DPAD_LEFT")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnDPAD_RIGHT':
         adbCmd(5, "shell input keyevent DPAD_RIGHT")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnVOLUME_UP':
         adbCmd(5, "shell input keyevent VOLUME_UP")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnVOLUME_DOWN':
         adbCmd(5, "shell input keyevent VOLUME_DOWN")
-        window['statusText'].update('Input ' + event + ", done")
     # ADB commands
     elif event == 'btnADB_ROOT':
         adbCmd(5, "root")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnADB_UNROOT':
         adbCmd(5, "unroot")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnADB_REMOUNT':
         adbCmd(5, "remount")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnWAKEUP':
         adbCmd(5, "shell input keyevent WAKEUP")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnSLEEP':
         adbCmd(5, "shell input keyevent SLEEP")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnREBOOT':
         adbCmd(10, "reboot")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnREBOOT_BL':
         adbCmd(10, "reboot bootloader")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnDISABLE_VERITY':
         adbCmd(5, "disable-verity")
-        window['statusText'].update('Input ' + event + ", done")
     # Fastboot commands
     elif event == 'btnFB_REBOOT':
         fastbootCmd(10, "reboot")
-        window['statusText'].update('Input ' + event + ", done")
     elif event == 'btnFB_REBOOT_BL':
         fastbootCmd(10, "reboot bootloader")
-        window['statusText'].update('Input ' + event + ", done")
     # Check devices
     elif event == 'btnADB_DEVICES':
         window['chkboxDevice'].update(text='None', disabled=True)
