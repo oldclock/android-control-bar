@@ -4,19 +4,16 @@
 
 import subprocess
 import time
+import threading
 import PySimpleGUI as sg
 
 # Functions
-def adbCmd(timeout_sec: int, command: str) -> bool:
+def cmdExec(timeout_sec: int, cmd: str) -> bool:
     rc = True
-    if timeout_sec < 1:
-        print("Arg timeout_sec must >= 1")
-        return False
     try:
-        cmd = "adb " + command
         stdoutdata = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=timeout_sec)
     except subprocess.TimeoutExpired:
-        #print("adb command TIMEOUT !!!")
+        #print("Oommand TIMEOUT !!!")
         window['statusText'].update('Command timeout: ' + cmd)
         rc = False
     except subprocess.CalledProcessError as e:
@@ -27,24 +24,24 @@ def adbCmd(timeout_sec: int, command: str) -> bool:
         window['statusText'].update('Command done: ' + cmd)
     return rc
 
+def adbCmd(timeout_sec: int, command: str) -> bool:
+    rc = True
+    if timeout_sec < 1:
+        print("Arg timeout_sec must >= 1")
+        return False
+    window['statusText'].update('Processing command: adb ' + command)
+    tCmd = threading.Thread(target=cmdExec, args=(timeout_sec, "adb " + command))
+    tCmd.start()
+    return rc
+
 def fastbootCmd(timeout_sec: int, command: str) -> bool:
     rc = True
     if timeout_sec < 1:
         print("Arg timeout_sec must >= 1")
         return False
-    try:
-        cmd = "fastboot " + command
-        stdoutdata = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=timeout_sec)
-    except subprocess.TimeoutExpired:
-        #print("fastboot command TIMEOUT !!!")
-        window['statusText'].update('Command timeout: ' + cmd)
-        rc = False
-    except subprocess.CalledProcessError as e:
-        print(e.output)
-        window['statusText'].update('Command error: ' + e.output)
-        rc = False
-    if rc == True:
-        window['statusText'].update('Command cone: ' + cmd)
+    window['statusText'].update('Processing command: fastboot ' + command)
+    tCmd = threading.Thread(target=cmdExec, args=(timeout_sec, "fastboot " + command))
+    tCmd.start()
     return rc
 
 # Define the window's contents
