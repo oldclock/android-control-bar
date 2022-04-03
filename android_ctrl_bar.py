@@ -7,53 +7,123 @@ import time
 import threading
 import PySimpleGUI as sg
 
+mExecAdbPath = str('adb.exe')
+mExecAdbPathVerified = bool(False)
+mExecFastbootPath = str('fastboot.exe')
+mExecFastbootPathVerified = bool(False)
+
 # Functions
-def cmdExec(timeout_sec: int, cmd: str) -> bool:
+def cmdExec(timeout_sec: int, cmd: str) -> bytes:
     rc = True
     try:
         stdoutdata = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=timeout_sec)
     except subprocess.TimeoutExpired:
-        #print("Oommand TIMEOUT !!!")
-        window['statusText'].update('Command timeout: ' + cmd)
+        #print("Command TIMEOUT !!!")
+        window['statusText'].update(window['statusText'].get() + 'Timeout !')
         rc = False
     except subprocess.CalledProcessError as e:
         print(e.output)
-        window['statusText'].update('Command error: ' + e.output)
+        window['statusText'].update(window['statusText'].get() + 'Error: ' + e.output)
         rc = False
     if rc == True:
-        window['statusText'].update('Command done: ' + cmd)
-    return rc
+        window['statusText'].update(window['statusText'].get() + ' done')
+        return stdoutdata
+    else:
+        return "ERROR"
 
 def adbCmd(timeout_sec: int, command: str) -> bool:
+    global mExecAdbPath, mExecAdbPathVerified
     rc = True
     if timeout_sec < 1:
         print("Arg timeout_sec must >= 1")
         return False
+    if mExecAdbPathVerified == False:
+        window['statusText'].update('ADB path not verified')
+        if verifyAdbPath(mExecAdbPath) == True:
+            mExecAdbPathVerified = True
+        else:
+            return False
+
     window['statusText'].update('Processing command: adb ' + command)
-    tCmd = threading.Thread(target=cmdExec, args=(timeout_sec, "adb " + command))
+    tCmd = threading.Thread(target=cmdExec, args=(timeout_sec, mExecAdbPath + " " + command))
     tCmd.start()
     return rc
 
 def fastbootCmd(timeout_sec: int, command: str) -> bool:
+    global mExecFastbootPath, mExecFastbootPathVerified
     rc = True
     if timeout_sec < 1:
         print("Arg timeout_sec must >= 1")
         return False
+    if mExecFastbootPathVerified == False:
+        window['statusText'].update('Fastboot path not verified')
+        if verifyFastbootPath(mExecFastbootPath) == True:
+            mExecFastbootPathVerified = True
+        else:
+            return False
+
     window['statusText'].update('Processing command: fastboot ' + command)
-    tCmd = threading.Thread(target=cmdExec, args=(timeout_sec, "fastboot " + command))
+    tCmd = threading.Thread(target=cmdExec, args=(timeout_sec, mExecFastbootPath + " " + command))
     tCmd.start()
+    return rc
+
+def verifyAdbPath(path: str) -> bool:
+    rc = False
+    window['statusText'].update('Processing command: adb --version')
+    adbVersion = cmdExec(10, path + " --version").decode('latin1')
+    if adbVersion[:20] == "Android Debug Bridge":
+        rc = True
+        window['statusCheckExec'].update(window['statusCheckExec'].get() + adbVersion + '\n')
+    return rc
+
+def verifyFastbootPath(path: str) -> bool:
+    rc = False
+    window['statusText'].update('Processing command: fastboot --version')
+    fastbootVersion = cmdExec(10, path + " --version").decode('latin1')
+    if fastbootVersion[:8] == "fastboot":
+        rc = True
+        window['statusCheckExec'].update(window['statusCheckExec'].get() + fastbootVersion + '\n')
+    return rc
+
+def checkExecutable() -> bool:
+    rc = True
+    global mExecAdbPath, mExecAdbPathVerified, mExecFastbootPath, mExecFastbootPathVerified
+    window['statusCheckExec'].update('')
+
+    tmpAdbPath = window['inputAdbPath'].get()
+    if tmpAdbPath == '':
+        window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse system ADB Path\n')
+        if verifyAdbPath(mExecAdbPath) == True:
+            mExecAdbPathVerified = True
+    elif tmpAdbPath[-7:].casefold() == "adb.exe":
+        window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input ADB Path\n')
+        if verifyAdbPath(tmpAdbPath) == True:
+            mExecAdbPath = tmpAdbPath
+            mExecAdbPathVerified = True
+
+    tmpFastbootPath = window['inputFastbootPath'].get()
+    if tmpFastbootPath == '':
+        window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse system Fastboot Path\n')
+        if verifyAdbPath(mExecFastbootPath) == True:
+            mExecFastbootPathVerified = True
+    if tmpFastbootPath[-12:].casefold() == "fastboot.exe":
+        window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input Fastboot Path\n')
+        if verifyAdbPath(tmpFastbootPath) == True:
+            mExecFastbootPath = tmpFastbootPath
+            mExecFastbootPathVerified = True
+
     return rc
 
 # Define the window's contents
 layout = [ [sg.Text("ADB commands:")],
-           [sg.Button(key='btnWAKEUP', button_text='Resume'),
-            sg.Button(key='btnSLEEP', button_text='Suspend'),
-            sg.Button(key='btnREBOOT', button_text='Reboot')],
-           [sg.Button(key='btnREBOOT_BL', button_text='Reboot Bootloader'),
-            sg.Button(key='btnDISABLE_VERITY', button_text='Disable-verity')],
+           [sg.Button(key='btnSLEEP', button_text='Suspend'),
+            sg.Button(key='btnWAKEUP', button_text='Resume'),
+            sg.Button(key='btnREBOOT', button_text='Reboot'),
+            sg.Button(key='btnREBOOT_BL', button_text='Reboot Bootloader')],
            [sg.Button(key='btnADB_ROOT', button_text='Root'),
             sg.Button(key='btnADB_UNROOT', button_text='Unroot'),
-            sg.Button(key='btnADB_REMOUNT', button_text='Remount')],
+            sg.Button(key='btnADB_REMOUNT', button_text='Remount'),
+            sg.Button(key='btnDISABLE_VERITY', button_text='Disable-verity')],
            [sg.HorizontalSeparator()],
            [sg.Text("Fastboot commands:")],
            [sg.Button(key='btnFB_REBOOT', button_text='Reboot'),
@@ -74,17 +144,29 @@ layout = [ [sg.Text("ADB commands:")],
            [sg.HorizontalSeparator()],
            [sg.Button(key='btnADB_DEVICES', button_text='Check ADB'),
             sg.Button(key='btnFB_DEVICES', button_text='Check Fastboot')],
-           [sg.Checkbox(key='chkboxDevice', text='None', disabled=True)],
-           [sg.HorizontalSeparator()],
-           [sg.Text("Source:", size=(6,1)), sg.Input(key='inputPushFileSource'), sg.FileBrowse()],
-           [sg.Text("Target:", size=(6,1)), sg.Input(key='inputPushTarget', default_text='/sdcard/')],
-           [sg.Button(size=(10,1), key='btnPushFile', button_text='Push File')],
-           [sg.HorizontalSeparator()],
-           [sg.Text("Status:"), sg.Text(key='statusText')]
+           [sg.Checkbox(key='chkboxDevice', text='None', disabled=True)]
          ]
 
+layoutTabFilePush = [ [sg.Text("Source:", size=(6,1)), sg.Input(key='inputPushFileSource'), sg.FileBrowse()],
+                      [sg.Text("Target:", size=(6,1)), sg.Input(key='inputPushTarget', default_text='/sdcard/')],
+                      [sg.Button(size=(10,1), key='btnPushFile', button_text='Push File')]
+                    ]
+
+layoutSettings = [ [sg.Text("Executable path:")],
+                   [sg.Text("ADB:", size=(8,1)), sg.Input(key='inputAdbPath'), sg.FileBrowse()],
+                   [sg.Text("Fastboot:", size=(8,1)), sg.Input(key='inputFastbootPath'), sg.FileBrowse()],
+                   [sg.Button(key='btnExecSave', button_text='Check and Save')],
+                   [sg.Text(key='statusCheckExec', expand_x=True, expand_y=True)]
+                 ]
+
+tabgroupMain = [ [sg.TabGroup([[sg.Tab('Main', layout),
+                                sg.Tab('File Push', layoutTabFilePush),
+                                sg.Tab('Settings', layoutSettings)]])],
+                 [sg.Text("Status:"), sg.Text(key='statusText')]
+               ]
+
 # Create the window
-window = sg.Window('Android Control Bar', layout, keep_on_top = True)
+window = sg.Window('Android Control Bar', tabgroupMain, keep_on_top = True)
 
 # Display and interact with the Window using an Event Loop
 while True:
@@ -92,7 +174,10 @@ while True:
     # See if user wants to quit or window was closed
     if event == sg.WINDOW_CLOSED:
         break
-    # Key codes
+    #
+    # Tab: Main
+    #
+    ## Key codes
     elif event == 'btnBACK':
         adbCmd(5, "shell input keyevent BACK")
     elif event == 'btnHOME':
@@ -115,7 +200,7 @@ while True:
         adbCmd(5, "shell input keyevent VOLUME_UP")
     elif event == 'btnVOLUME_DOWN':
         adbCmd(5, "shell input keyevent VOLUME_DOWN")
-    # ADB commands
+    ## ADB commands
     elif event == 'btnADB_ROOT':
         adbCmd(5, "root")
     elif event == 'btnADB_UNROOT':
@@ -137,7 +222,7 @@ while True:
         fastbootCmd(10, "reboot")
     elif event == 'btnFB_REBOOT_BL':
         fastbootCmd(10, "reboot bootloader")
-    # Check devices
+    ## Check devices
     elif event == 'btnADB_DEVICES':
         window['chkboxDevice'].update(text='None', disabled=True)
         cmd = "adb devices"
@@ -170,9 +255,16 @@ while True:
                 strSerial, strDevStatus = line.split(maxsplit=1)
                 if strDevStatus == 'fastboot':
                     window['chkboxDevice'].update(text=strSerial, disabled=False)
-    # Push file to device
+    # 
+    # Tab: Push file to device
+    #
     elif event == 'btnPushFile':
         adbCmd(10, "push \"" + window['inputPushFileSource'].get() + "\" \"" + window['inputPushTarget'].get() + "\"")
+    #
+    # Tab: Settings
+    #
+    elif event == 'btnExecSave':
+        checkExecutable()
 
 # Finish up by removing from the screen
 window.close()
