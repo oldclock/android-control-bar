@@ -7,6 +7,6 @@ A Python GUI (PySimpleGUI) to control Android devices via ADB/Fastboot interface
 ## TODO
 
 - [ ] Local settings file
-- [ ] Specify ADB/Fastboot path
+- [x] Specify ADB/Fastboot path
 - [ ] Multiple device support
 - [ ] Drag and drop to push file to device
