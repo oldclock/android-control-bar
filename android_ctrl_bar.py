@@ -152,7 +152,9 @@ layoutTabFilePush = [ [sg.Text("Source:", size=(6,1)), sg.Input(key='inputPushFi
                       [sg.Button(size=(10,1), key='btnPushFile', button_text='Push File')]
                     ]
 
-layoutSettings = [ [sg.Text("Executable path:")],
+layoutSettings = [ [sg.Checkbox(key='chkboxAlwaysOnTop', text='Always on Top', default=True, enable_events=True)],
+                   [sg.HorizontalSeparator()],
+                   [sg.Text("Executable path:")],
                    [sg.Text("ADB:", size=(8,1)), sg.Input(key='inputAdbPath'), sg.FileBrowse()],
                    [sg.Text("Fastboot:", size=(8,1)), sg.Input(key='inputFastbootPath'), sg.FileBrowse()],
                    [sg.Button(key='btnExecSave', button_text='Check and Save')],
@@ -263,6 +265,11 @@ while True:
     #
     # Tab: Settings
     #
+    elif event == 'chkboxAlwaysOnTop':
+        if window['chkboxAlwaysOnTop'].get() == True:
+            window.keep_on_top_set()
+        else:
+            window.keep_on_top_clear()
     elif event == 'btnExecSave':
         checkExecutable()
 
