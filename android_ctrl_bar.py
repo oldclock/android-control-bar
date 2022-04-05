@@ -2,8 +2,9 @@
 # Android control bar
 #
 
+import configparser
 import subprocess
-import time
+#import time
 import threading
 import PySimpleGUI as sg
 
@@ -106,7 +107,7 @@ def checkExecutable() -> bool:
         window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse system Fastboot Path\n')
         if verifyAdbPath(mExecFastbootPath) == True:
             mExecFastbootPathVerified = True
-    if tmpFastbootPath[-12:].casefold() == "fastboot.exe":
+    elif tmpFastbootPath[-12:].casefold() == "fastboot.exe":
         window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input Fastboot Path\n')
         if verifyAdbPath(tmpFastbootPath) == True:
             mExecFastbootPath = tmpFastbootPath
@@ -168,7 +169,31 @@ tabgroupMain = [ [sg.TabGroup([[sg.Tab('Main', layout),
                ]
 
 # Create the window
-window = sg.Window('Android Control Bar', tabgroupMain, keep_on_top = True)
+window = sg.Window('Android Control Bar', tabgroupMain, keep_on_top = True, finalize=True)
+
+# Create configuration handler
+config = configparser.ConfigParser()
+config.read('local_config.ini')
+if config['Settings']['always_on_top'] == 'true':
+    window.keep_on_top_set()
+    window['chkboxAlwaysOnTop'].update(True)
+else:
+    window.keep_on_top_clear()
+    window['chkboxAlwaysOnTop'].update(False)
+
+#tmpAdbPath = config['Settings']['ADB']
+#if tmpAdbPath[-7:].casefold() == "adb.exe":
+#    window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input ADB Path\n')
+#    if verifyAdbPath(tmpAdbPath) == True:
+#        mExecAdbPath = tmpAdbPath
+#        mExecAdbPathVerified = True
+
+#tmpFastbootPath = config['Settings']['Fastboot']
+#if tmpFastbootPath[-12:].casefold() == "fastboot.exe":
+#    window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input Fastboot Path\n')
+#    if verifyAdbPath(tmpFastbootPath) == True:
+#        mExecFastbootPath = tmpFastbootPath
+#        mExecFastbootPathVerified = True
 
 # Display and interact with the Window using an Event Loop
 while True:
@@ -268,8 +293,12 @@ while True:
     elif event == 'chkboxAlwaysOnTop':
         if window['chkboxAlwaysOnTop'].get() == True:
             window.keep_on_top_set()
+            config['Settings']['always_on_top'] = 'true'
         else:
             window.keep_on_top_clear()
+            config['Settings']['always_on_top'] = 'false'
+        with open('local_config.ini', 'w') as configfile:
+            config.write(configfile)
     elif event == 'btnExecSave':
         checkExecutable()
 
