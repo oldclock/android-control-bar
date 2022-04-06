@@ -221,7 +221,7 @@ if 'host_settings' in config:
         tmpFastbootPath = config['host_settings']['Fastboot']
         if tmpFastbootPath[-12:].casefold() == "fastboot.exe":
             #window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input Fastboot Path\n')
-            if verifyAdbPath(tmpFastbootPath) == True:
+            if verifyFastbootPath(tmpFastbootPath) == True:
                 mExecFastbootPath = tmpFastbootPath
                 mExecFastbootPathVerified = True
                 window['inputFastbootPath'].update(mExecFastbootPath)
