@@ -166,7 +166,8 @@ layout = [ [sg.Text("ADB commands:")],
            [sg.Text("Key codes:")],
            [sg.Button(size=(5,1), key='btnBACK', button_text='◀'),
             sg.Button(size=(5,1), key='btnHOME', button_text='●'),
-            sg.Button(size=(5,1), key='btnAPP_SWITCH', button_text='◼')],
+            sg.Button(size=(5,1), key='btnAPP_SWITCH', button_text='◼'),
+            sg.Button(size=(5,1), key='btnVOLUME_MUTE', button_text='♪×')],
            [sg.Button(size=(5,1), key='btnPAGE_UP', button_text='PgUp'),
             sg.Button(size=(5,1), key='btnDPAD_UP', button_text='↑'),
             sg.Button(size=(5,1), key='btnPAGE_DOWN', button_text='PgDn'),
@@ -269,6 +270,8 @@ while True:
         adbCmd(5, "shell input keyevent VOLUME_UP")
     elif event == 'btnVOLUME_DOWN':
         adbCmd(5, "shell input keyevent VOLUME_DOWN")
+    elif event == 'btnVOLUME_MUTE':
+        adbCmd(5, "shell input keyevent VOLUME_MUTE")
     ## ADB commands
     elif event == 'btnADB_ROOT':
         adbCmd(5, "root")
