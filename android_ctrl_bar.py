@@ -87,7 +87,7 @@ def verifyAdbPath(path: str) -> bool:
     adbVersion = cmdExec(10, path + " --version").decode('latin1')
     if adbVersion[:20] == "Android Debug Bridge":
         rc = True
-        window['statusCheckExec'].update(window['statusCheckExec'].get() + adbVersion + '\n')
+        window['statusCheckExec'].update(adbVersion + '\n', append=True)
     return rc
 
 def verifyFastbootPath(path: str) -> bool:
@@ -96,7 +96,7 @@ def verifyFastbootPath(path: str) -> bool:
     fastbootVersion = cmdExec(10, path + " --version").decode('latin1')
     if fastbootVersion[:8] == "fastboot":
         rc = True
-        window['statusCheckExec'].update(window['statusCheckExec'].get() + fastbootVersion + '\n')
+        window['statusCheckExec'].update(fastbootVersion + '\n', append=True)
     return rc
 
 def checkExecutable() -> bool:
@@ -106,7 +106,7 @@ def checkExecutable() -> bool:
 
     tmpAdbPath = window['inputAdbPath'].get()
     if tmpAdbPath[-7:].casefold() == "adb.exe":
-        window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input ADB Path\n')
+        window['statusCheckExec'].update('Use user input ADB Path\n', append=True)
         if verifyAdbPath(tmpAdbPath) == True:
             mExecAdbPath = tmpAdbPath
             mExecAdbPathVerified = True
@@ -117,7 +117,7 @@ def checkExecutable() -> bool:
                 config.write(configfile)
     else:
         window['inputAdbPath'].update('')
-        window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse system ADB Path\n')
+        window['statusCheckExec'].update('Use system ADB Path\n', append=True)
         mExecAdbPath = EXEC_ADB_DEFAULT
         if 'host_settings' in config:
             if 'ADB' in config['host_settings']:
@@ -129,7 +129,7 @@ def checkExecutable() -> bool:
 
     tmpFastbootPath = window['inputFastbootPath'].get()
     if tmpFastbootPath[-12:].casefold() == "fastboot.exe":
-        window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input Fastboot Path\n')
+        window['statusCheckExec'].update('Use user input Fastboot Path\n', append=True)
         if verifyFastbootPath(tmpFastbootPath) == True:
             mExecFastbootPath = tmpFastbootPath
             mExecFastbootPathVerified = True
@@ -140,7 +140,7 @@ def checkExecutable() -> bool:
                 config.write(configfile)
     else:
         window['inputFastbootPath'].update('')
-        window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse system Fastboot Path\n')
+        window['statusCheckExec'].update('Use system Fastboot Path\n', append=True)
         mExecFastbootPath = EXEC_FASTBOOT_DEFAULT
         if 'host_settings' in config:
             if 'Fastboot' in config['host_settings']:
@@ -228,7 +228,7 @@ if 'host_settings' in config:
     if 'ADB' in config['host_settings']:
         tmpAdbPath = config['host_settings']['ADB']
         if tmpAdbPath[-7:].casefold() == "adb.exe":
-            #window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input ADB Path\n')
+            window['statusCheckExec'].update('Use user input ADB Path\n', append=True)
             if verifyAdbPath(tmpAdbPath) == True:
                 mExecAdbPath = tmpAdbPath
                 mExecAdbPathVerified = True
@@ -237,7 +237,7 @@ if 'host_settings' in config:
     if 'Fastboot' in config['host_settings']:
         tmpFastbootPath = config['host_settings']['Fastboot']
         if tmpFastbootPath[-12:].casefold() == "fastboot.exe":
-            #window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input Fastboot Path\n')
+            window['statusCheckExec'].update('Use user input Fastboot Path\n', append=True)
             if verifyFastbootPath(tmpFastbootPath) == True:
                 mExecFastbootPath = tmpFastbootPath
                 mExecFastbootPathVerified = True
