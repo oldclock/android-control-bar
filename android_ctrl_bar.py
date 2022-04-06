@@ -17,8 +17,10 @@ mExecFastbootPathVerified = bool(False)
 # Functions
 def cmdExec(timeout_sec: int, cmd: str) -> bytes:
     rc = True
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     try:
-        stdoutdata = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=timeout_sec)
+        stdoutdata = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=timeout_sec, startupinfo=startupinfo)
     except subprocess.TimeoutExpired:
         #print("Command TIMEOUT !!!")
         window['statusText'].update(window['statusText'].get() + 'Timeout !')
