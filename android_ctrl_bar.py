@@ -69,6 +69,14 @@ def fastbootCmd(timeout_sec: int, command: str) -> bool:
     tCmd.start()
     return rc
 
+def installApk(source: str) -> bool:
+    if source[-4:].casefold() == ".apk":
+        rc = adbCmd(20, "install -r -g " + source)
+    else:
+        window['statusText'].update('Invalid APK source path')
+        rc = False
+    return rc
+
 def verifyAdbPath(path: str) -> bool:
     rc = False
     window['statusText'].update('Processing command: adb --version')
@@ -175,7 +183,10 @@ layout = [ [sg.Text("ADB commands:")],
 
 layoutTabFilePush = [ [sg.Text("Source:", size=(6,1)), sg.Input(key='inputPushFileSource'), sg.FileBrowse()],
                       [sg.Text("Target:", size=(6,1)), sg.Input(key='inputPushTarget', default_text='/sdcard/')],
-                      [sg.Button(size=(10,1), key='btnPushFile', button_text='Push File')]
+                      [sg.Button(size=(10,1), key='btnPushFile', button_text='Push File')],
+                      [sg.HorizontalSeparator()],
+                      [sg.Text("APK:", size=(6,1)), sg.Input(key='inputApkSource'), sg.FileBrowse()],
+                      [sg.Button(size=(10,1), key='btnInstallApk', button_text='Install')]
                     ]
 
 layoutConfig = [ [sg.Checkbox(key='chkboxAlwaysOnTop', text='Always on Top', default=True, enable_events=True)],
@@ -318,6 +329,8 @@ while True:
     #
     elif event == 'btnPushFile':
         adbCmd(10, "push \"" + window['inputPushFileSource'].get() + "\" \"" + window['inputPushTarget'].get() + "\"")
+    elif event == 'btnInstallApk':
+        installApk(window['inputApkSource'].get())
     #
     # Tab: Settings
     #
