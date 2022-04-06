@@ -130,3 +130,6 @@ dmypy.json
 
 # EXE Convertion
 *.exe
+
+# Local setting file
+local_config.ini

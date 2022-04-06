@@ -101,6 +101,11 @@ def checkExecutable() -> bool:
         if verifyAdbPath(tmpAdbPath) == True:
             mExecAdbPath = tmpAdbPath
             mExecAdbPathVerified = True
+            if 'host_settings' not in config:
+                config['host_settings'] = {}
+            config['host_settings']['ADB'] = mExecAdbPath
+            with open('local_config.ini', 'w') as configfile:
+                config.write(configfile)
 
     tmpFastbootPath = window['inputFastbootPath'].get()
     if tmpFastbootPath == '':
@@ -112,6 +117,11 @@ def checkExecutable() -> bool:
         if verifyAdbPath(tmpFastbootPath) == True:
             mExecFastbootPath = tmpFastbootPath
             mExecFastbootPathVerified = True
+            if 'host_settings' not in config:
+                config['host_settings'] = {}
+            config['host_settings']['Fastboot'] = mExecAdbPath
+            with open('local_config.ini', 'w') as configfile:
+                config.write(configfile)
 
     return rc
 
@@ -174,26 +184,32 @@ window = sg.Window('Android Control Bar', tabgroupMain, keep_on_top = True, fina
 # Create configuration handler
 config = configparser.ConfigParser()
 config.read('local_config.ini')
-if config['Settings']['always_on_top'] == 'true':
-    window.keep_on_top_set()
-    window['chkboxAlwaysOnTop'].update(True)
-else:
-    window.keep_on_top_clear()
-    window['chkboxAlwaysOnTop'].update(False)
+if 'host_settings' in config:
+    if 'always_on_top' in config['host_settings']:
+        if config['host_settings']['always_on_top'] == 'true':
+            window.keep_on_top_set()
+            window['chkboxAlwaysOnTop'].update(True)
+        else:
+            window.keep_on_top_clear()
+            window['chkboxAlwaysOnTop'].update(False)
 
-#tmpAdbPath = config['Settings']['ADB']
-#if tmpAdbPath[-7:].casefold() == "adb.exe":
-#    window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input ADB Path\n')
-#    if verifyAdbPath(tmpAdbPath) == True:
-#        mExecAdbPath = tmpAdbPath
-#        mExecAdbPathVerified = True
+    if 'ADB' in config['host_settings']:
+        tmpAdbPath = config['host_settings']['ADB']
+        if tmpAdbPath[-7:].casefold() == "adb.exe":
+            #window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input ADB Path\n')
+            if verifyAdbPath(tmpAdbPath) == True:
+                mExecAdbPath = tmpAdbPath
+                mExecAdbPathVerified = True
+                window['inputAdbPath'].update(mExecAdbPath)
 
-#tmpFastbootPath = config['Settings']['Fastboot']
-#if tmpFastbootPath[-12:].casefold() == "fastboot.exe":
-#    window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input Fastboot Path\n')
-#    if verifyAdbPath(tmpFastbootPath) == True:
-#        mExecFastbootPath = tmpFastbootPath
-#        mExecFastbootPathVerified = True
+    if 'Fastboot' in config['host_settings']:
+        tmpFastbootPath = config['host_settings']['Fastboot']
+        if tmpFastbootPath[-12:].casefold() == "fastboot.exe":
+            #window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input Fastboot Path\n')
+            if verifyAdbPath(tmpFastbootPath) == True:
+                mExecFastbootPath = tmpFastbootPath
+                mExecFastbootPathVerified = True
+                window['inputFastbootPath'].update(mExecFastbootPath)
 
 # Display and interact with the Window using an Event Loop
 while True:
@@ -291,12 +307,14 @@ while True:
     # Tab: Settings
     #
     elif event == 'chkboxAlwaysOnTop':
+        if 'host_settings' not in config:
+            config['host_settings'] = {}
         if window['chkboxAlwaysOnTop'].get() == True:
             window.keep_on_top_set()
-            config['Settings']['always_on_top'] = 'true'
+            config['host_settings']['always_on_top'] = 'true'
         else:
             window.keep_on_top_clear()
-            config['Settings']['always_on_top'] = 'false'
+            config['host_settings']['always_on_top'] = 'false'
         with open('local_config.ini', 'w') as configfile:
             config.write(configfile)
     elif event == 'btnExecSave':
