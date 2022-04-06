@@ -7,6 +7,8 @@ import subprocess
 import threading
 import PySimpleGUI as sg
 
+from version import __version__
+
 EXEC_ADB_DEFAULT = str('adb.exe')
 mExecAdbPath = EXEC_ADB_DEFAULT
 mExecAdbPathVerified = bool(False)
@@ -198,7 +200,8 @@ layoutConfig = [ [sg.Checkbox(key='chkboxAlwaysOnTop', text='Always on Top', def
                  [sg.Text("ADB:", size=(8,1)), sg.Input(key='inputAdbPath'), sg.FileBrowse()],
                  [sg.Text("Fastboot:", size=(8,1)), sg.Input(key='inputFastbootPath'), sg.FileBrowse()],
                  [sg.Button(key='btnExecSave', button_text='Check and Save')],
-                 [sg.Multiline(key='statusCheckExec', size=(64, 12))]
+                 [sg.Multiline(key='statusCheckExec', size=(64, 10))],
+                 [sg.Text("Version: " + __version__)]
                ]
 
 tabgroupMain = [ [sg.TabGroup([[sg.Tab('Main', layout),
