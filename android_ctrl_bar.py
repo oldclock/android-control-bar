@@ -178,18 +178,18 @@ layoutTabFilePush = [ [sg.Text("Source:", size=(6,1)), sg.Input(key='inputPushFi
                       [sg.Button(size=(10,1), key='btnPushFile', button_text='Push File')]
                     ]
 
-layoutSettings = [ [sg.Checkbox(key='chkboxAlwaysOnTop', text='Always on Top', default=True, enable_events=True)],
-                   [sg.HorizontalSeparator()],
-                   [sg.Text("Executable path:")],
-                   [sg.Text("ADB:", size=(8,1)), sg.Input(key='inputAdbPath'), sg.FileBrowse()],
-                   [sg.Text("Fastboot:", size=(8,1)), sg.Input(key='inputFastbootPath'), sg.FileBrowse()],
-                   [sg.Button(key='btnExecSave', button_text='Check and Save')],
-                   [sg.Text(key='statusCheckExec', expand_x=True, expand_y=True)]
-                 ]
+layoutConfig = [ [sg.Checkbox(key='chkboxAlwaysOnTop', text='Always on Top', default=True, enable_events=True)],
+                 [sg.HorizontalSeparator()],
+                 [sg.Text("Executable path:")],
+                 [sg.Text("ADB:", size=(8,1)), sg.Input(key='inputAdbPath'), sg.FileBrowse()],
+                 [sg.Text("Fastboot:", size=(8,1)), sg.Input(key='inputFastbootPath'), sg.FileBrowse()],
+                 [sg.Button(key='btnExecSave', button_text='Check and Save')],
+                 [sg.Text(key='statusCheckExec', expand_x=True, expand_y=True)]
+               ]
 
 tabgroupMain = [ [sg.TabGroup([[sg.Tab('Main', layout),
                                 sg.Tab('File Push', layoutTabFilePush),
-                                sg.Tab('Settings', layoutSettings)]])],
+                                sg.Tab('Configuration', layoutConfig)]])],
                  [sg.Text("Status:"), sg.Text(key='statusText')]
                ]
 
