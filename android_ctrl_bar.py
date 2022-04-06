@@ -4,13 +4,14 @@
 
 import configparser
 import subprocess
-#import time
 import threading
 import PySimpleGUI as sg
 
-mExecAdbPath = str('adb.exe')
+EXEC_ADB_DEFAULT = str('adb.exe')
+mExecAdbPath = EXEC_ADB_DEFAULT
 mExecAdbPathVerified = bool(False)
-mExecFastbootPath = str('fastboot.exe')
+EXEC_FASTBOOT_DEFAULT = str('fastboot.exe')
+mExecFastbootPath = EXEC_FASTBOOT_DEFAULT
 mExecFastbootPathVerified = bool(False)
 
 # Functions
@@ -92,11 +93,7 @@ def checkExecutable() -> bool:
     window['statusCheckExec'].update('')
 
     tmpAdbPath = window['inputAdbPath'].get()
-    if tmpAdbPath == '':
-        window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse system ADB Path\n')
-        if verifyAdbPath(mExecAdbPath) == True:
-            mExecAdbPathVerified = True
-    elif tmpAdbPath[-7:].casefold() == "adb.exe":
+    if tmpAdbPath[-7:].casefold() == "adb.exe":
         window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input ADB Path\n')
         if verifyAdbPath(tmpAdbPath) == True:
             mExecAdbPath = tmpAdbPath
@@ -106,22 +103,40 @@ def checkExecutable() -> bool:
             config['host_settings']['ADB'] = mExecAdbPath
             with open('local_config.ini', 'w') as configfile:
                 config.write(configfile)
+    else:
+        window['inputAdbPath'].update('')
+        window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse system ADB Path\n')
+        mExecAdbPath = EXEC_ADB_DEFAULT
+        if 'host_settings' in config:
+            if 'ADB' in config['host_settings']:
+                config['host_settings']['ADB'] = EXEC_ADB_DEFAULT
+                with open('local_config.ini', 'w') as configfile:
+                    config.write(configfile)
+        if verifyAdbPath(EXEC_ADB_DEFAULT) == True:
+            mExecAdbPathVerified = True
 
     tmpFastbootPath = window['inputFastbootPath'].get()
-    if tmpFastbootPath == '':
-        window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse system Fastboot Path\n')
-        if verifyAdbPath(mExecFastbootPath) == True:
-            mExecFastbootPathVerified = True
-    elif tmpFastbootPath[-12:].casefold() == "fastboot.exe":
+    if tmpFastbootPath[-12:].casefold() == "fastboot.exe":
         window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse user input Fastboot Path\n')
-        if verifyAdbPath(tmpFastbootPath) == True:
+        if verifyFastbootPath(tmpFastbootPath) == True:
             mExecFastbootPath = tmpFastbootPath
             mExecFastbootPathVerified = True
             if 'host_settings' not in config:
                 config['host_settings'] = {}
-            config['host_settings']['Fastboot'] = mExecAdbPath
+            config['host_settings']['Fastboot'] = mExecFastbootPath
             with open('local_config.ini', 'w') as configfile:
                 config.write(configfile)
+    else:
+        window['inputFastbootPath'].update('')
+        window['statusCheckExec'].update(window['statusCheckExec'].get() + '\nUse system Fastboot Path\n')
+        mExecFastbootPath = EXEC_FASTBOOT_DEFAULT
+        if 'host_settings' in config:
+            if 'Fastboot' in config['host_settings']:
+                config['host_settings']['Fastboot'] = EXEC_FASTBOOT_DEFAULT
+                with open('local_config.ini', 'w') as configfile:
+                    config.write(configfile)
+        if verifyFastbootPath(mExecFastbootPath) == True:
+            mExecFastbootPathVerified = True
 
     return rc
 
