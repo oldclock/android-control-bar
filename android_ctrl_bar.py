@@ -181,11 +181,11 @@ layout = [ [sg.Text("ADB commands:")],
            [sg.Checkbox(key='chkboxDevice', text='None', disabled=True)]
          ]
 
-layoutTabFilePush = [ [sg.Text("Source:", size=(6,1)), sg.Input(key='inputPushFileSource'), sg.FileBrowse()],
-                      [sg.Text("Target:", size=(6,1)), sg.Input(key='inputPushTarget', default_text='/sdcard/')],
+layoutTabFilePush = [ [sg.Text("Source:", size=(8,1)), sg.Input(key='inputPushFileSource'), sg.FileBrowse()],
+                      [sg.Text("Target:", size=(8,1)), sg.Input(key='inputPushTarget', default_text='/sdcard/')],
                       [sg.Button(size=(10,1), key='btnPushFile', button_text='Push File')],
                       [sg.HorizontalSeparator()],
-                      [sg.Text("APK:", size=(6,1)), sg.Input(key='inputApkSource'), sg.FileBrowse()],
+                      [sg.Text("APK:", size=(8,1)), sg.Input(key='inputApkSource'), sg.FileBrowse()],
                       [sg.Button(size=(10,1), key='btnInstallApk', button_text='Install')]
                     ]
 
@@ -195,7 +195,7 @@ layoutConfig = [ [sg.Checkbox(key='chkboxAlwaysOnTop', text='Always on Top', def
                  [sg.Text("ADB:", size=(8,1)), sg.Input(key='inputAdbPath'), sg.FileBrowse()],
                  [sg.Text("Fastboot:", size=(8,1)), sg.Input(key='inputFastbootPath'), sg.FileBrowse()],
                  [sg.Button(key='btnExecSave', button_text='Check and Save')],
-                 [sg.Text(key='statusCheckExec', expand_x=True, expand_y=True)]
+                 [sg.Multiline(key='statusCheckExec', size=(64, 12))]
                ]
 
 tabgroupMain = [ [sg.TabGroup([[sg.Tab('Main', layout),
