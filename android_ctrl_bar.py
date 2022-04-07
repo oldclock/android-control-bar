@@ -3,6 +3,7 @@
 #
 
 import configparser
+import re
 import subprocess
 import threading
 import PySimpleGUI as sg
@@ -152,6 +153,38 @@ def checkExecutable() -> bool:
 
     return rc
 
+def loadCustButton():
+    if 'custom_button' in config:
+        for i in [1, 2, 3, 4]:
+            for j in [1, 2, 3, 4]:
+                currentBtnName = 'btnCust_'+ str(i) + '_' + str(j)
+                if currentBtnName in config['custom_button'] and config['custom_button'][currentBtnName] == 'true':
+                    window[currentBtnName].update(text=(config['custom_button'][currentBtnName + '_text']))
+
+def execCustButton(btnName: str):
+    if 'custom_button' in config:
+        if btnName in config['custom_button'] and config['custom_button'][btnName] == 'true':
+            if btnName+'_type' in config['custom_button']:
+                if config['custom_button'][btnName+'_type'] == 'adb':
+                    if btnName+'_cmd' in config['custom_button']:
+                        adbCmd(20, config['custom_button'][btnName+'_cmd'])
+                    else:
+                        window['statusText'].update('No command defined for this button')
+                elif config['custom_button'][btnName+'_type'] == 'fastboot':
+                    if btnName+'_cmd' in config['custom_button']:
+                        fastbootCmd(20, config['custom_button'][btnName+'_cmd'])
+                    else:
+                        window['statusText'].update('No command defined for this button')
+                else:
+                    window['statusText'].update('Invalid command type')
+            else:
+                window['statusText'].update('No type defined for this button')
+        else:
+            window['statusText'].update('Button not enabled')
+    else:
+        window['statusText'].update('No custom button setting')
+
+
 # Define the window's contents
 layout = [ [sg.Text("ADB commands:")],
            [sg.Button(key='btnSLEEP', button_text='Suspend'),
@@ -186,6 +219,24 @@ layout = [ [sg.Text("ADB commands:")],
            [sg.Checkbox(key='chkboxDevice', text='None', disabled=True)]
          ]
 
+layoutCustBtn = [ [sg.Button(size=(12,2), key='btnCust_1_1', button_text='Button 1-1'),
+                   sg.Button(size=(12,2), key='btnCust_1_2', button_text='Button 1-2'),
+                   sg.Button(size=(12,2), key='btnCust_1_3', button_text='Button 1-3'),
+                   sg.Button(size=(12,2), key='btnCust_1_4', button_text='Button 1-4')],
+                  [sg.Button(size=(12,2), key='btnCust_2_1', button_text='Button 2-1'),
+                   sg.Button(size=(12,2), key='btnCust_2_2', button_text='Button 2-2'),
+                   sg.Button(size=(12,2), key='btnCust_2_3', button_text='Button 2-3'),
+                   sg.Button(size=(12,2), key='btnCust_2_4', button_text='Button 2-4')],
+                  [sg.Button(size=(12,2), key='btnCust_3_1', button_text='Button 3-1'),
+                   sg.Button(size=(12,2), key='btnCust_3_2', button_text='Button 3-2'),
+                   sg.Button(size=(12,2), key='btnCust_3_3', button_text='Button 3-3'),
+                   sg.Button(size=(12,2), key='btnCust_3_4', button_text='Button 3-4')],
+                  [sg.Button(size=(12,2), key='btnCust_4_1', button_text='Button 4-1'),
+                   sg.Button(size=(12,2), key='btnCust_4_2', button_text='Button 4-2'),
+                   sg.Button(size=(12,2), key='btnCust_4_3', button_text='Button 4-3'),
+                   sg.Button(size=(12,2), key='btnCust_4_4', button_text='Button 4-4')],
+                ]
+
 layoutTabFilePush = [ [sg.Text("Source:", size=(8,1)), sg.Input(key='inputPushFileSource'), sg.FileBrowse()],
                       [sg.Text("Target:", size=(8,1)), sg.Input(key='inputPushTarget', default_text='/sdcard/')],
                       [sg.Button(size=(10,1), key='btnPushFile', button_text='Push File')],
@@ -205,7 +256,8 @@ layoutConfig = [ [sg.Checkbox(key='chkboxAlwaysOnTop', text='Always on Top', def
                ]
 
 tabgroupMain = [ [sg.TabGroup([[sg.Tab('Main', layout),
-                                sg.Tab('File Push', layoutTabFilePush),
+                                sg.Tab('Custom Button', layoutCustBtn),
+                                sg.Tab('Push File/APK', layoutTabFilePush),
                                 sg.Tab('Configuration', layoutConfig)]])],
                  [sg.Text("Status:"), sg.Text(key='statusText')]
                ]
@@ -242,6 +294,8 @@ if 'host_settings' in config:
                 mExecFastbootPath = tmpFastbootPath
                 mExecFastbootPathVerified = True
                 window['inputFastbootPath'].update(mExecFastbootPath)
+
+loadCustButton()
 
 # Display and interact with the Window using an Event Loop
 while True:
@@ -332,7 +386,7 @@ while True:
                 strSerial, strDevStatus = line.split(maxsplit=1)
                 if strDevStatus == 'fastboot':
                     window['chkboxDevice'].update(text=strSerial, disabled=False)
-    # 
+    #
     # Tab: Push file to device
     #
     elif event == 'btnPushFile':
@@ -355,6 +409,14 @@ while True:
             config.write(configfile)
     elif event == 'btnExecSave':
         checkExecutable()
+    #
+    # Custom Buttons
+    #
+    elif re.match('btnCust_[1-4]_[1-4]', event):
+        execCustButton(event)
+
+    else:
+        window['statusText'].update('Unhandled event: ' + event)
 
 # Finish up by removing from the screen
 window.close()
