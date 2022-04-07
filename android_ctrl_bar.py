@@ -153,6 +153,36 @@ def checkExecutable() -> bool:
 
     return rc
 
+def loadConfig():
+    global config
+    config.read('local_config.ini')
+    if 'host_settings' in config:
+        if 'always_on_top' in config['host_settings']:
+            if config['host_settings']['always_on_top'] == 'true':
+                window.keep_on_top_set()
+                window['chkboxAlwaysOnTop'].update(True)
+            else:
+                window.keep_on_top_clear()
+                window['chkboxAlwaysOnTop'].update(False)
+
+        if 'ADB' in config['host_settings']:
+            tmpAdbPath = config['host_settings']['ADB']
+            if tmpAdbPath[-7:].casefold() == "adb.exe":
+                window['statusCheckExec'].update('Use user input ADB Path\n', append=True)
+                if verifyAdbPath(tmpAdbPath) == True:
+                    mExecAdbPath = tmpAdbPath
+                    mExecAdbPathVerified = True
+                    window['inputAdbPath'].update(mExecAdbPath)
+
+        if 'Fastboot' in config['host_settings']:
+            tmpFastbootPath = config['host_settings']['Fastboot']
+            if tmpFastbootPath[-12:].casefold() == "fastboot.exe":
+                window['statusCheckExec'].update('Use user input Fastboot Path\n', append=True)
+                if verifyFastbootPath(tmpFastbootPath) == True:
+                    mExecFastbootPath = tmpFastbootPath
+                    mExecFastbootPathVerified = True
+                    window['inputFastbootPath'].update(mExecFastbootPath)
+
 def loadCustButton():
     if 'custom_button' in config:
         for i in [1, 2, 3, 4]:
@@ -267,34 +297,9 @@ window = sg.Window('Android Control Bar', tabgroupMain, keep_on_top = True, fina
 
 # Create configuration handler
 config = configparser.ConfigParser()
-config.read('local_config.ini')
-if 'host_settings' in config:
-    if 'always_on_top' in config['host_settings']:
-        if config['host_settings']['always_on_top'] == 'true':
-            window.keep_on_top_set()
-            window['chkboxAlwaysOnTop'].update(True)
-        else:
-            window.keep_on_top_clear()
-            window['chkboxAlwaysOnTop'].update(False)
+loadConfig()
 
-    if 'ADB' in config['host_settings']:
-        tmpAdbPath = config['host_settings']['ADB']
-        if tmpAdbPath[-7:].casefold() == "adb.exe":
-            window['statusCheckExec'].update('Use user input ADB Path\n', append=True)
-            if verifyAdbPath(tmpAdbPath) == True:
-                mExecAdbPath = tmpAdbPath
-                mExecAdbPathVerified = True
-                window['inputAdbPath'].update(mExecAdbPath)
-
-    if 'Fastboot' in config['host_settings']:
-        tmpFastbootPath = config['host_settings']['Fastboot']
-        if tmpFastbootPath[-12:].casefold() == "fastboot.exe":
-            window['statusCheckExec'].update('Use user input Fastboot Path\n', append=True)
-            if verifyFastbootPath(tmpFastbootPath) == True:
-                mExecFastbootPath = tmpFastbootPath
-                mExecFastbootPathVerified = True
-                window['inputFastbootPath'].update(mExecFastbootPath)
-
+# load custom button text to layout
 loadCustButton()
 
 # Display and interact with the Window using an Event Loop
