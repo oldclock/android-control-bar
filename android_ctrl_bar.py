@@ -6,6 +6,7 @@ import configparser
 import re
 import subprocess
 import threading
+from datetime import datetime
 import PySimpleGUI as sg
 
 from version import __version__
@@ -222,6 +223,16 @@ def execCustButton(btnName: str):
     else:
         window['statusText'].update('No custom button setting')
 
+def getScreenShot() -> bool:
+    now = datetime.now()
+    screencap_file = "screenshot_" + now.strftime("%Y%m%d_%H%M%S") + ".png"
+    fp = open(screencap_file, "a+")
+    try:
+        subprocess.check_call('adb exec-out screencap -p', stdout=fp, timeout=20)
+    except subprocess.TimeoutExpired:
+        window['statusText'].update('Screenshot Timeout !')
+    fp.close()
+    return True
 
 # Define the window's contents
 layout = [ [sg.Text("ADB commands:")],
@@ -232,7 +243,8 @@ layout = [ [sg.Text("ADB commands:")],
            [sg.Button(key='btnADB_ROOT', button_text='Root'),
             sg.Button(key='btnADB_UNROOT', button_text='Unroot'),
             sg.Button(key='btnADB_REMOUNT', button_text='Remount'),
-            sg.Button(key='btnDISABLE_VERITY', button_text='Disable-verity')],
+            sg.Button(key='btnDISABLE_VERITY', button_text='Disable-verity'),
+            sg.Button(key='btnScreenShot', button_text='Screenshot')],
            [sg.HorizontalSeparator()],
            [sg.Text("Fastboot commands:")],
            [sg.Button(key='btnFB_REBOOT', button_text='Reboot'),
@@ -362,6 +374,8 @@ while True:
         adbCmd(10, "reboot bootloader")
     elif event == 'btnDISABLE_VERITY':
         adbCmd(5, "disable-verity")
+    elif event == 'btnScreenShot':
+        getScreenShot()
     # Fastboot commands
     elif event == 'btnFB_REBOOT':
         fastbootCmd(10, "reboot")
