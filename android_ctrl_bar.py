@@ -185,7 +185,7 @@ def loadConfig():
 
 def loadCustButton():
     if 'custom_button' in config:
-        for i in [1, 2, 3, 4]:
+        for i in [1, 2, 3, 4, 5, 6, 7]:
             for j in [1, 2, 3, 4]:
                 currentBtnName = 'btnCust_'+ str(i) + '_' + str(j)
                 if currentBtnName in config['custom_button'] and config['custom_button'][currentBtnName] == 'true':
@@ -265,6 +265,18 @@ layoutCustBtn = [ [sg.Button(size=(12,2), key='btnCust_1_1', button_text='Button
                    sg.Button(size=(12,2), key='btnCust_4_2', button_text='Button 4-2'),
                    sg.Button(size=(12,2), key='btnCust_4_3', button_text='Button 4-3'),
                    sg.Button(size=(12,2), key='btnCust_4_4', button_text='Button 4-4')],
+                  [sg.Button(size=(12,2), key='btnCust_5_1', button_text='Button 5-1'),
+                   sg.Button(size=(12,2), key='btnCust_5_2', button_text='Button 5-2'),
+                   sg.Button(size=(12,2), key='btnCust_5_3', button_text='Button 5-3'),
+                   sg.Button(size=(12,2), key='btnCust_5_4', button_text='Button 5-4')],
+                  [sg.Button(size=(12,2), key='btnCust_6_1', button_text='Button 6-1'),
+                   sg.Button(size=(12,2), key='btnCust_6_2', button_text='Button 6-2'),
+                   sg.Button(size=(12,2), key='btnCust_6_3', button_text='Button 6-3'),
+                   sg.Button(size=(12,2), key='btnCust_6_4', button_text='Button 6-4')],
+                  [sg.Button(size=(12,2), key='btnCust_7_1', button_text='Button 7-1'),
+                   sg.Button(size=(12,2), key='btnCust_7_2', button_text='Button 7-2'),
+                   sg.Button(size=(12,2), key='btnCust_7_3', button_text='Button 7-3'),
+                   sg.Button(size=(12,2), key='btnCust_7_4', button_text='Button 7-4')],
                 ]
 
 layoutTabFilePush = [ [sg.Text("Source:", size=(8,1)), sg.Input(key='inputPushFileSource'), sg.FileBrowse()],
@@ -417,7 +429,7 @@ while True:
     #
     # Custom Buttons
     #
-    elif re.match('btnCust_[1-4]_[1-4]', event):
+    elif re.match('btnCust_[1-7]_[1-4]', event):
         execCustButton(event)
 
     else:
