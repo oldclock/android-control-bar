@@ -26,17 +26,19 @@ def cmdExec(timeout_sec: int, cmd: str) -> bytes:
         stdoutdata = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=timeout_sec, startupinfo=startupinfo)
     except subprocess.TimeoutExpired:
         #print("Command TIMEOUT !!!")
-        window['statusText'].update(window['statusText'].get() + 'Timeout !')
+        window['statusText'].update(window['statusText'].get() + ' Timeout !')
         rc = False
+        bytesRcError = bytes('command timeout', 'latin1')
     except subprocess.CalledProcessError as e:
-        print(e.output)
-        window['statusText'].update(window['statusText'].get() + 'Error: ' + e.output)
+        #print(e.output)
+        window['statusText'].update(window['statusText'].get() + ' Error !')
         rc = False
+        bytesRcError = e.output
     if rc == True:
-        window['statusText'].update(window['statusText'].get() + ' done')
+        window['statusText'].update(window['statusText'].get() + ' Done')
         return stdoutdata
     else:
-        return "ERROR"
+        return bytesRcError
 
 def adbCmd(timeout_sec: int, command: str) -> bool:
     global mExecAdbPath, mExecAdbPathVerified
@@ -102,7 +104,7 @@ def verifyFastbootPath(path: str) -> bool:
 
 def checkExecutable() -> bool:
     rc = True
-    global mExecAdbPath, mExecAdbPathVerified, mExecFastbootPath, mExecFastbootPathVerified
+    global config, mExecAdbPath, mExecAdbPathVerified, mExecFastbootPath, mExecFastbootPathVerified
     window['statusCheckExec'].update('')
 
     tmpAdbPath = window['inputAdbPath'].get()
@@ -154,7 +156,7 @@ def checkExecutable() -> bool:
     return rc
 
 def loadConfig():
-    global config
+    global config, mExecAdbPath, mExecAdbPathVerified, mExecFastbootPath, mExecFastbootPathVerified
     config.read('local_config.ini')
     if 'host_settings' in config:
         if 'always_on_top' in config['host_settings']:
@@ -185,7 +187,7 @@ def loadConfig():
 
 def loadCustButton():
     if 'custom_button' in config:
-        for i in [1, 2, 3, 4, 5, 6, 7]:
+        for i in [1, 2, 3, 4]:
             for j in [1, 2, 3, 4]:
                 currentBtnName = 'btnCust_'+ str(i) + '_' + str(j)
                 if currentBtnName in config['custom_button'] and config['custom_button'][currentBtnName] == 'true':
@@ -197,12 +199,18 @@ def execCustButton(btnName: str):
             if btnName+'_type' in config['custom_button']:
                 if config['custom_button'][btnName+'_type'] == 'adb':
                     if btnName+'_cmd' in config['custom_button']:
-                        adbCmd(20, config['custom_button'][btnName+'_cmd'])
+                        window['statusCustBtn'].update('')
+                        window['statusText'].update('Processing command ...')
+                        outputExec = cmdExec(20, "adb " + config['custom_button'][btnName+'_cmd']).decode('latin1')
+                        window['statusCustBtn'].update(outputExec + '\n', append=True)
                     else:
                         window['statusText'].update('No command defined for this button')
                 elif config['custom_button'][btnName+'_type'] == 'fastboot':
                     if btnName+'_cmd' in config['custom_button']:
-                        fastbootCmd(20, config['custom_button'][btnName+'_cmd'])
+                        window['statusCustBtn'].update('')
+                        window['statusText'].update('Processing command ...')
+                        outputExec = cmdExec(20, "fastboot " + config['custom_button'][btnName+'_cmd']).decode('latin1')
+                        window['statusCustBtn'].update(outputExec + '\n', append=True)
                     else:
                         window['statusText'].update('No command defined for this button')
                 else:
@@ -265,18 +273,7 @@ layoutCustBtn = [ [sg.Button(size=(12,2), key='btnCust_1_1', button_text='Button
                    sg.Button(size=(12,2), key='btnCust_4_2', button_text='Button 4-2'),
                    sg.Button(size=(12,2), key='btnCust_4_3', button_text='Button 4-3'),
                    sg.Button(size=(12,2), key='btnCust_4_4', button_text='Button 4-4')],
-                  [sg.Button(size=(12,2), key='btnCust_5_1', button_text='Button 5-1'),
-                   sg.Button(size=(12,2), key='btnCust_5_2', button_text='Button 5-2'),
-                   sg.Button(size=(12,2), key='btnCust_5_3', button_text='Button 5-3'),
-                   sg.Button(size=(12,2), key='btnCust_5_4', button_text='Button 5-4')],
-                  [sg.Button(size=(12,2), key='btnCust_6_1', button_text='Button 6-1'),
-                   sg.Button(size=(12,2), key='btnCust_6_2', button_text='Button 6-2'),
-                   sg.Button(size=(12,2), key='btnCust_6_3', button_text='Button 6-3'),
-                   sg.Button(size=(12,2), key='btnCust_6_4', button_text='Button 6-4')],
-                  [sg.Button(size=(12,2), key='btnCust_7_1', button_text='Button 7-1'),
-                   sg.Button(size=(12,2), key='btnCust_7_2', button_text='Button 7-2'),
-                   sg.Button(size=(12,2), key='btnCust_7_3', button_text='Button 7-3'),
-                   sg.Button(size=(12,2), key='btnCust_7_4', button_text='Button 7-4')],
+                  [sg.Multiline(key='statusCustBtn', size=(64, 9))],
                 ]
 
 layoutTabFilePush = [ [sg.Text("Source:", size=(8,1)), sg.Input(key='inputPushFileSource'), sg.FileBrowse()],
@@ -429,7 +426,7 @@ while True:
     #
     # Custom Buttons
     #
-    elif re.match('btnCust_[1-7]_[1-4]', event):
+    elif re.match('btnCust_[1-4]_[1-4]', event):
         execCustButton(event)
 
     else:
