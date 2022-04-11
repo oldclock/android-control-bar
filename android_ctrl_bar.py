@@ -41,7 +41,7 @@ def cmdExec(timeout_sec: int, cmd: str) -> bytes:
     else:
         return bytesRcError
 
-def adbCmd(timeout_sec: int, command: str) -> bool:
+def adbCmd(timeout_sec: int, command: str, blocking=False, donotprintcmd=False) -> bool:
     global mExecAdbPath, mExecAdbPathVerified
     rc = True
     if timeout_sec < 1:
@@ -54,12 +54,19 @@ def adbCmd(timeout_sec: int, command: str) -> bool:
         else:
             return False
 
-    window['statusText'].update('Processing command: adb ' + command)
-    tCmd = threading.Thread(target=cmdExec, args=(timeout_sec, mExecAdbPath + " " + command))
-    tCmd.start()
+    if donotprintcmd == True:
+        window['statusText'].update('Processing adb command ...')
+    else:
+        window['statusText'].update('Processing command: adb ' + command)
+
+    if blocking == True:
+        cmdExec(timeout_sec, mExecAdbPath + " " + command)
+    else:
+        tCmd = threading.Thread(target=cmdExec, args=(timeout_sec, mExecAdbPath + " " + command))
+        tCmd.start()
     return rc
 
-def fastbootCmd(timeout_sec: int, command: str) -> bool:
+def fastbootCmd(timeout_sec: int, command: str, blocking=False, donotprintcmd=False) -> bool:
     global mExecFastbootPath, mExecFastbootPathVerified
     rc = True
     if timeout_sec < 1:
@@ -72,9 +79,16 @@ def fastbootCmd(timeout_sec: int, command: str) -> bool:
         else:
             return False
 
-    window['statusText'].update('Processing command: fastboot ' + command)
-    tCmd = threading.Thread(target=cmdExec, args=(timeout_sec, mExecFastbootPath + " " + command))
-    tCmd.start()
+    if donotprintcmd == True:
+        window['statusText'].update('Processing fastboot command ... ')
+    else:
+        window['statusText'].update('Processing command: fastboot ' + command)
+
+    if blocking == True:
+        cmdExec(timeout_sec, mExecFastbootPath + " " + command)
+    else:
+        tCmd = threading.Thread(target=cmdExec, args=(timeout_sec, mExecFastbootPath + " " + command))
+        tCmd.start()
     return rc
 
 def installApk(source: str) -> bool:
