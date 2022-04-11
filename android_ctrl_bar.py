@@ -386,14 +386,11 @@ while True:
         window['chkboxDevice'].update(text='None', disabled=True)
         cmd = "adb devices"
         stdoutdata = subprocess.getoutput(cmd)
-        print(stdoutdata)
         for line in stdoutdata.splitlines():
             if line[0] == '*':
-                # ignore
-                print(line)
+                pass
             elif line == 'List of devices attached':
-                # ignore
-                print(line)
+                pass
             else:
                 strSerial, strDevStatus = line.split(maxsplit=1)
                 if strDevStatus == 'device':
@@ -402,14 +399,11 @@ while True:
         window['chkboxDevice'].update(text='None', disabled=True)
         cmd = "fastboot devices"
         stdoutdata = subprocess.getoutput(cmd)
-        print(stdoutdata)
         for line in stdoutdata.splitlines():
             if line[0] == '*':
-                # ignore
-                print(line)
+                pass
             elif line == 'List of devices attached':
-                # ignore
-                print(line)
+                pass
             else:
                 strSerial, strDevStatus = line.split(maxsplit=1)
                 if strDevStatus == 'fastboot':
