@@ -3,7 +3,6 @@
 #
 
 import configparser
-import os
 import re
 import subprocess
 import threading
@@ -321,27 +320,8 @@ layoutConfig = [ [sg.Checkbox(key='chkboxAlwaysOnTop', text='Always on Top', def
                  [sg.Text("Version: " + __version__)]
                ]
 
-layoutImages = [
-    [sg.Text("Folder:", size=(8,1)), sg.Input(key='inputImageFolderPath'), sg.FolderBrowse()],
-    [sg.Button(key='btnShowImage', button_text='Show images')],
-    [sg.HorizontalSeparator()],
-    [sg.Image(size=(120, 60), key='imageT1', visible=False, enable_events=True), sg.Image(size=(120, 60), key='imageT2', visible=False, enable_events=True),
-     sg.Image(size=(120, 60), key='imageT3', visible=False, enable_events=True), sg.Image(size=(120, 60), key='imageT4', visible=False, enable_events=True)],
-    [sg.Image(size=(120, 60), key='imageT5', visible=False, enable_events=True), sg.Image(size=(120, 60), key='imageT6', visible=False, enable_events=True),
-     sg.Image(size=(120, 60), key='imageT7', visible=False, enable_events=True), sg.Image(size=(120, 60), key='imageT8', visible=False, enable_events=True)],
-    [sg.Image(size=(120, 60), key='imageT9', visible=False, enable_events=True), sg.Image(size=(120, 60), key='imageT10', visible=False, enable_events=True),
-     sg.Image(size=(120, 60), key='imageT11', visible=False, enable_events=True), sg.Image(size=(120, 60), key='imageT12', visible=False, enable_events=True)],
-    [sg.Image(size=(120, 60), key='imageT13', visible=False, enable_events=True), sg.Image(size=(120, 60), key='imageT14', visible=False, enable_events=True),
-     sg.Image(size=(120, 60), key='imageT15', visible=False, enable_events=True), sg.Image(size=(120, 60), key='imageT16', visible=False, enable_events=True)],
-    [sg.Image(size=(120, 60), key='imageT17', visible=False, enable_events=True), sg.Image(size=(120, 60), key='imageT18', visible=False, enable_events=True),
-     sg.Image(size=(120, 60), key='imageT19', visible=False, enable_events=True), sg.Image(size=(120, 60), key='imageT20', visible=False, enable_events=True)],
-    [sg.Image(size=(120, 60), key='imageT21', visible=False, enable_events=True), sg.Image(size=(120, 60), key='imageT22', visible=False, enable_events=True),
-     sg.Image(size=(120, 60), key='imageT23', visible=False, enable_events=True), sg.Image(size=(120, 60), key='imageT24', visible=False, enable_events=True)],
-]
-
 tabgroupMain = [ [sg.TabGroup([[sg.Tab('Main', layout),
                                 sg.Tab('Custom Button', layoutCustBtn),
-                                sg.Tab('Show Images', layoutImages),
                                 sg.Tab('Push File/APK', layoutTabFilePush),
                                 sg.Tab('Configuration', layoutConfig)]])],
                  [sg.Text("Status:"), sg.Text(key='statusText')]
@@ -465,32 +445,6 @@ while True:
             config.write(configfile)
     elif event == 'btnExecSave':
         checkExecutable()
-    #
-    # Tab: Show image
-    #
-    elif event == 'btnShowImage':
-        folderName = values['inputImageFolderPath'] or '.'
-        print(folderName)
-        window['statusText'].update('Loading images ... ')
-        i = 1
-        for file in os.listdir(folderName):
-            if i > 24:
-                break
-            if file.endswith(".png") or file.endswith(".jpg"):
-                fileFullPath = os.path.join(folderName, file)
-                window['imageT' + str(i)].update(source=fileFullPath, subsample=40, visible=True)
-                print(fileFullPath)
-                i = i + 1
-        window['statusText'].update('Loading images ... Done')
-
-    #TODO: get path and name from image element
-    # elif re.match('imageT[0-9][0-9]', event):
-    #     imagePath = window[event].Source
-    #     print(str(imagePath))
-    #     imageFolder = os.path.dirname(str(imagePath))
-    #     imageFilename = os.path.basename(str(imagePath))
-    #     print(imageFolder + ' XXX ' + imageFilename)
-
     #
     # Custom Buttons
     #
