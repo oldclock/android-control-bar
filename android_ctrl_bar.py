@@ -250,14 +250,14 @@ def getScreenShot() -> bool:
 
 # Define the window's contents
 layout = [ [sg.Text("ADB commands:")],
-           [sg.Button(key='btnSLEEP', button_text='Suspend'),
-            sg.Button(key='btnWAKEUP', button_text='Resume'),
-            sg.Button(key='btnREBOOT', button_text='Reboot'),
-            sg.Button(key='btnREBOOT_BL', button_text='Reboot Bootloader')],
+           [sg.Button(key='btnAdbKeycode_SLEEP', button_text='Suspend'),
+            sg.Button(key='btnAdbKeycode_WAKEUP', button_text='Resume'),
+            sg.Button(key='btnADB_REBOOT', button_text='Reboot'),
+            sg.Button(key='btnADB_REBOOT_BL', button_text='Reboot Bootloader')],
            [sg.Button(key='btnADB_ROOT', button_text='Root'),
             sg.Button(key='btnADB_UNROOT', button_text='Unroot'),
             sg.Button(key='btnADB_REMOUNT', button_text='Remount'),
-            sg.Button(key='btnDISABLE_VERITY', button_text='Disable-verity'),
+            sg.Button(key='btnADB_DISABLE_VERITY', button_text='Disable-verity'),
             sg.Button(key='btnScreenShot', button_text='Screenshot')],
            [sg.HorizontalSeparator()],
            [sg.Text("Fastboot commands:")],
@@ -265,18 +265,19 @@ layout = [ [sg.Text("ADB commands:")],
             sg.Button(key='btnFB_REBOOT_BL', button_text='Reboot Bootloader')],
            [sg.HorizontalSeparator()],
            [sg.Text("Key codes:")],
-           [sg.Button(size=(5,1), key='btnBACK', button_text='◀'),
-            sg.Button(size=(5,1), key='btnHOME', button_text='●'),
-            sg.Button(size=(5,1), key='btnAPP_SWITCH', button_text='◼'),
-            sg.Button(size=(5,1), key='btnVOLUME_MUTE', button_text='♪×')],
-           [sg.Button(size=(5,1), key='btnPAGE_UP', button_text='PgUp'),
-            sg.Button(size=(5,1), key='btnDPAD_UP', button_text='↑'),
-            sg.Button(size=(5,1), key='btnPAGE_DOWN', button_text='PgDn'),
-            sg.Button(size=(5,1), key='btnVOLUME_UP', button_text='♪+')],
-           [sg.Button(size=(5,1), key='btnDPAD_LEFT', button_text='←'),
-            sg.Button(size=(5,1), key='btnDPAD_DOWN', button_text='↓'),
-            sg.Button(size=(5,1), key='btnDPAD_RIGHT', button_text='→'),
-            sg.Button(size=(5,1), key='btnVOLUME_DOWN', button_text='♪-')],
+           [sg.Button(size=(5,1), key='btnAdbKeycode_BACK', button_text='◀'),
+            sg.Button(size=(5,1), key='btnAdbKeycode_HOME', button_text='●'),
+            sg.Button(size=(5,1), key='btnAdbKeycode_APP_SWITCH', button_text='◼'),
+            sg.Button(size=(5,1), key='btnAdbKeycode_MENU', button_text='≡')],
+           [sg.Button(size=(5,1), key='btnAdbKeycode_PAGE_UP', button_text='PgUp'),
+            sg.Button(size=(5,1), key='btnAdbKeycode_DPAD_UP', button_text='↑'),
+            sg.Button(size=(5,1), key='btnAdbKeycode_PAGE_DOWN', button_text='PgDn'),
+            sg.Button(size=(5,1), key='btnAdbKeycode_VOLUME_UP', button_text='♪+'),
+            sg.Button(size=(5,1), key='btnAdbKeycode_VOLUME_MUTE', button_text='♪×')],
+           [sg.Button(size=(5,1), key='btnAdbKeycode_DPAD_LEFT', button_text='←'),
+            sg.Button(size=(5,1), key='btnAdbKeycode_DPAD_DOWN', button_text='↓'),
+            sg.Button(size=(5,1), key='btnAdbKeycode_DPAD_RIGHT', button_text='→'),
+            sg.Button(size=(5,1), key='btnAdbKeycode_VOLUME_DOWN', button_text='♪-')],
            [sg.HorizontalSeparator()],
            [sg.Button(key='btnADB_DEVICES', button_text='Check ADB'),
             sg.Button(key='btnFB_DEVICES', button_text='Check Fastboot')],
@@ -347,30 +348,9 @@ while True:
     # Tab: Main
     #
     ## Key codes
-    elif event == 'btnBACK':
-        adbCmd(5, "shell input keyevent BACK")
-    elif event == 'btnHOME':
-        adbCmd(5, "shell input keyevent HOME")
-    elif event == 'btnAPP_SWITCH':
-        adbCmd(5, "shell input keyevent APP_SWITCH")
-    elif event == 'btnPAGE_UP':
-        adbCmd(5, "shell input keyevent PAGE_UP")
-    elif event == 'btnPAGE_DOWN':
-        adbCmd(5, "shell input keyevent PAGE_DOWN")
-    elif event == 'btnDPAD_UP':
-        adbCmd(5, "shell input keyevent DPAD_UP")
-    elif event == 'btnDPAD_DOWN':
-        adbCmd(5, "shell input keyevent DPAD_DOWN")
-    elif event == 'btnDPAD_LEFT':
-        adbCmd(5, "shell input keyevent DPAD_LEFT")
-    elif event == 'btnDPAD_RIGHT':
-        adbCmd(5, "shell input keyevent DPAD_RIGHT")
-    elif event == 'btnVOLUME_UP':
-        adbCmd(5, "shell input keyevent VOLUME_UP")
-    elif event == 'btnVOLUME_DOWN':
-        adbCmd(5, "shell input keyevent VOLUME_DOWN")
-    elif event == 'btnVOLUME_MUTE':
-        adbCmd(5, "shell input keyevent VOLUME_MUTE")
+    elif re.match('btnAdbKeycode_([ -~]+)', event):
+        dontcare, keycode = event.split('_', maxsplit=1)
+        adbCmd(5, "shell input keyevent " + keycode)
     ## ADB commands
     elif event == 'btnADB_ROOT':
         adbCmd(5, "root")
@@ -378,15 +358,11 @@ while True:
         adbCmd(5, "unroot")
     elif event == 'btnADB_REMOUNT':
         adbCmd(5, "remount")
-    elif event == 'btnWAKEUP':
-        adbCmd(5, "shell input keyevent WAKEUP")
-    elif event == 'btnSLEEP':
-        adbCmd(5, "shell input keyevent SLEEP")
-    elif event == 'btnREBOOT':
+    elif event == 'btnADB_REBOOT':
         adbCmd(10, "reboot")
-    elif event == 'btnREBOOT_BL':
+    elif event == 'btnADB_REBOOT_BL':
         adbCmd(10, "reboot bootloader")
-    elif event == 'btnDISABLE_VERITY':
+    elif event == 'btnADB_DISABLE_VERITY':
         adbCmd(5, "disable-verity")
     elif event == 'btnScreenShot':
         getScreenShot()
