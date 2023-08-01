@@ -7,14 +7,30 @@ A Python GUI (PySimpleGUI) to control Android devices via ADB/Fastboot interface
 ## Dependency
 
 - Python 3
-- PySimpleGUI
+- Packages
   - <code>pip install pysimplegui</code>
-  - <code>pip install psgcompiler</code> (Optional, to create standalone EXE file)
+- Optional packages
+  - <code>pip install psgcompiler</code> (to create standalone EXE file)
+
+## Run (on Windows)
+
+<code>
+python android_ctrl_bar.py
+</code>
+
+## Create standalone EXE file
+
+<code>
+pyinstaller --onefile --windowed --name=android_ctrl_panel --hidden-import=pyi_splash --splash image/splash.png --workpath . --distpath . --specpath . android_ctrl_bar.py
+</code>
 
 ## TODO
 
 - [x] Local settings file
 - [x] Specify ADB/Fastboot path
+- [x] Response for adb root success or not
+- [ ] ADB/Fastboot command queue
+- [x] Separate tabs to different files
 - [ ] Multiple device support
 - [ ] Monitor device plug/unplug status
 - [ ] Drag and drop to push file to device
